@@ -1,16 +1,33 @@
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 public class Movement : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] private float _moveSpeed = 10f;
+
+    private Rigidbody2D _rigidbody;
+
+    private float _moveX;
+
+    private void Awake()
     {
-        
+        _rigidbody = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void FixedUpdate()
     {
-        
+        Move();
+    }
+
+    public void SetCurrentDirection(float currentDirection)
+    {
+        _moveX = currentDirection;
+    }
+
+    private void Move()
+    {
+        Vector2 movement = new Vector2(_moveX * _moveSpeed, _rigidbody.linearVelocity.y);
+        _rigidbody.linearVelocity = movement;
     }
 }

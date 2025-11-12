@@ -16,15 +16,17 @@ public class PlayerController : MonoBehaviour
     private FrameInput _frameInput;
 
     private bool _isGrounded = false;
-    private Vector2 _movement;
+    
 
     private Rigidbody2D _rigidBody;
+    private Movement _movement;
 
     public void Awake() {
         if (Instance == null) { Instance = this; }
 
         _rigidBody = GetComponent<Rigidbody2D>();
         _playerInput = GetComponent<PlayerInput>();
+        _movement = GetComponent<Movement>();
     }
 
     private void Update()
@@ -32,12 +34,8 @@ public class PlayerController : MonoBehaviour
         GatherInput();
         Jump();
         HandleSpriteFlip();
+        Movement();
     }
-
-    private void FixedUpdate() {
-        Move();
-    }
-
 
     public bool IsFacingRight()
     {
@@ -62,13 +60,15 @@ public class PlayerController : MonoBehaviour
         //_movement = new Vector2(moveX * _moveSpeed, _rigidBody.linearVelocity.y);
 
         _frameInput = _playerInput.FrameInput;
-        _movement = new Vector2(_frameInput.Move.x * _moveSpeed, _rigidBody.linearVelocity.y);
+        
     }
 
-    private void Move() {
+    private void Movement()
+    {
+        _movement.SetCurrentDirection(_frameInput.Move.x);
 
-        _rigidBody.linearVelocity = new Vector2(_movement.x, _rigidBody.linearVelocity.y);
     }
+
 
     private void Jump()
     {
