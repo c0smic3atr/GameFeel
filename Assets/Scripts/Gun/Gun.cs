@@ -1,7 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Pool;
+using Unity.Cinemachine;
 
 public class Gun : MonoBehaviour
 {
@@ -13,16 +16,24 @@ public class Gun : MonoBehaviour
     [SerializeField] private Bullet _bulletPrefab;
     [SerializeField] private float _gunFireCD = 0.5f;
 
+    private ObjectPool<Bullet> _bulletPool;
     private static readonly int FIRE_HASH = Animator.StringToHash("Fire");
     private Vector2 _mousePos;
     private float _lastFireTime = 0f;
 
+    private CinemachineImpulseSource _impulseSource;
     private Animator _animator;
 
 
     private void Awake()
     {
+        _impulseSource = GetComponent<CinemachineImpulseSource>();
         _animator = GetComponent<Animator>();
+    }
+
+    private void Start()
+    {
+        CreateBulletPool();
     }
 
     private void Update()
@@ -36,6 +47,7 @@ public class Gun : MonoBehaviour
         onShoot += ShootProjectile;
         onShoot += ResetLastFireTime;
         onShoot += FireAnimation;
+        onShoot += GunScreenShake;
     }
 
     private void OnDisable()
@@ -43,6 +55,28 @@ public class Gun : MonoBehaviour
         onShoot -= ShootProjectile;
         onShoot -= ResetLastFireTime;
         onShoot -= FireAnimation;
+        onShoot -= GunScreenShake;
+    }
+
+    public void ReleaseBulletFromPool(Bullet bullet)
+    {
+        _bulletPool.Release(bullet);
+    }
+
+    private void CreateBulletPool()
+    {
+        _bulletPool = new ObjectPool<Bullet>(() =>
+        {
+            return Instantiate(_bulletPrefab);
+        }, bullet => {
+            bullet.gameObject.SetActive(true);
+        }, Bullet =>
+        {
+            Bullet.gameObject.SetActive(false);
+        }, bullet =>
+        {
+            Destroy(bullet);
+        });
     }
 
     private void Shoot()
@@ -55,9 +89,9 @@ public class Gun : MonoBehaviour
 
     private void ShootProjectile()
     {
-        
-        Bullet newBullet = Instantiate(_bulletPrefab, _bulletSpawnPoint.position, Quaternion.identity);
-        newBullet.Intit(_bulletSpawnPoint.position, _mousePos);
+
+        Bullet newBullet = _bulletPool.Get();
+        newBullet.Intit(this, _bulletSpawnPoint.position, _mousePos);
     }
 
     private void FireAnimation()
@@ -69,6 +103,11 @@ public class Gun : MonoBehaviour
     {
         _lastFireTime = Time.time + _gunFireCD;
 
+    }
+
+    private void GunScreenShake()
+    {
+        _impulseSource.GenerateImpulse();
     }
 
     private void RotateGun()

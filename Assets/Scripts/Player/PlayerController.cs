@@ -6,8 +6,14 @@ public class PlayerController : MonoBehaviour
 {
     public static PlayerController Instance;
 
-    [SerializeField] private float _moveSpeed = 5f;
+    [SerializeField] private Transform _feetTranform;
+    [SerializeField] private Vector2 _groundCheck;
+    [SerializeField] private LayerMask _groundlayer;
+    
     [SerializeField] private float _jumpStrength = 7f;
+
+    private PlayerInput _playerInput;
+    private FrameInput _frameInput;
 
     private bool _isGrounded = false;
     private Vector2 _movement;
@@ -18,6 +24,7 @@ public class PlayerController : MonoBehaviour
         if (Instance == null) { Instance = this; }
 
         _rigidBody = GetComponent<Rigidbody2D>();
+        _playerInput = GetComponent<PlayerInput>();
     }
 
     private void Update()
@@ -31,41 +38,46 @@ public class PlayerController : MonoBehaviour
         Move();
     }
 
-    private void OnCollisionEnter2D(Collision2D other)
-    {
-        if (other.gameObject.layer == LayerMask.NameToLayer("Ground"))
-        {
-            _isGrounded = true;
-        }
-    }
-
-    private void OnCollisionExit2D(Collision2D other)
-    {
-        if (other.gameObject.layer == LayerMask.NameToLayer("Ground"))
-        {
-            _isGrounded = false;
-        }
-    }
 
     public bool IsFacingRight()
     {
         return transform.eulerAngles.y == 0;
     }
 
+    private bool CheckGrounded()
+    {
+        Collider2D isGrounded = Physics2D.OverlapBox(_feetTranform.position, _groundCheck, 0f, _groundlayer);
+        return isGrounded;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireCube(_feetTranform.position, _groundCheck);
+    }
+
     private void GatherInput()
     {
-        float moveX = Input.GetAxis("Horizontal");
-        _movement = new Vector2(moveX * _moveSpeed, _rigidBody.linearVelocity.y);
+        //float moveX = Input.GetAxis("Horizontal");
+        //_movement = new Vector2(moveX * _moveSpeed, _rigidBody.linearVelocity.y);
+
+        _frameInput = _playerInput.FrameInput;
+        _movement = new Vector2(_frameInput.Move.x * _moveSpeed, _rigidBody.linearVelocity.y);
     }
 
     private void Move() {
 
-        _rigidBody.linearVelocity = _movement;
+        _rigidBody.linearVelocity = new Vector2(_movement.x, _rigidBody.linearVelocity.y);
     }
 
     private void Jump()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && _isGrounded) {
+        if(!_frameInput.Jump)
+        {
+            return;
+        }
+
+        if (CheckGrounded()) {
             _rigidBody.AddForce(Vector2.up * _jumpStrength, ForceMode2D.Impulse);
         }
     }
