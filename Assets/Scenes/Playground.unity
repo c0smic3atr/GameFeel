@@ -841,9 +841,12 @@ GameObject:
   - component: {fileID: 2011273897}
   - component: {fileID: 2011273889}
   - component: {fileID: 2011273888}
+  - component: {fileID: 2011273898}
+  - component: {fileID: 2011273899}
+  - component: {fileID: 2011273900}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -952,7 +955,7 @@ GameObject:
   - component: {fileID: 994124716}
   m_Layer: 3
   m_Name: Foreground
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7738,13 +7741,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac92c8116167b104b829fceb3bfadda9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _feetTranform: {fileID: 1225571914}
-  _groundCheck: {x: 1.12, y: 0.22}
+  _feetTranform: {fileID: 0}
+  _groundCheck: {x: 0, y: 0}
   _groundlayer:
     serializedVersion: 2
-    m_Bits: 8
-  _moveSpeed: 20
-  _jumpStrength: 10
+    m_Bits: 0
+  _jumpStrength: 7
+  _extraGravity: 700
+  _gravityDelay: 0.2
+  _coyoteTime: 0.5
 --- !u!70 &2011273897
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -7782,6 +7787,44 @@ CapsuleCollider2D:
   m_Offset: {x: 0.0029752227, y: -1.0256488}
   m_Size: {x: 1.2675709, y: 0.42326242}
   m_Direction: 1
+--- !u!114 &2011273898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 817729410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16066bd0062f38d4f951266431993de1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2011273899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 817729410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffd9ef3dc8441034091fe6af16fc219f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _moveSpeed: 10
+--- !u!114 &2011273900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 817729410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70b296a537380d043a4808cfec4b42c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  knockbackTime: 0.2
 --- !u!1 &2043640393
 GameObject:
   m_ObjectHideFlags: 0

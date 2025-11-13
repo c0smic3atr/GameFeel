@@ -1,16 +1,25 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    public static Action onJump;
+
     public static PlayerController Instance;
 
     [SerializeField] private Transform _feetTranform;
     [SerializeField] private Vector2 _groundCheck;
     [SerializeField] private LayerMask _groundlayer;
-    
     [SerializeField] private float _jumpStrength = 7f;
+    [SerializeField] private float _extraGravity = 700f;
+    [SerializeField] private float _gravityDelay = 0.2f;
+    [SerializeField] private float _coyoteTime = 0.5f;
+
+    private float timeInAir;
+    private float _coyoteTimer;
+    private bool doubleJumpAvailable;
 
     private PlayerInput _playerInput;
     private FrameInput _frameInput;
@@ -29,12 +38,30 @@ public class PlayerController : MonoBehaviour
         _movement = GetComponent<Movement>();
     }
 
+    private void OnEnable()
+    {
+        onJump += ApplyJumpForce;
+    }
+    private void OnDisable()
+    {
+        onJump -= ApplyJumpForce;
+    }
+
     private void Update()
     {
         GatherInput();
-        Jump();
+        CoyoteTimer();
+        HandleJump();
         HandleSpriteFlip();
         Movement();
+        GravityDelay();
+    }
+
+    
+
+    private void FixedUpdate()
+    {
+        extraGravity();
     }
 
     public bool IsFacingRight()
@@ -54,6 +81,26 @@ public class PlayerController : MonoBehaviour
         Gizmos.DrawWireCube(_feetTranform.position, _groundCheck);
     }
 
+    private void GravityDelay()
+    {
+        if (!CheckGrounded())
+        {
+            timeInAir = Time.deltaTime;
+        }
+        else
+        {
+            timeInAir = 0f;
+        }
+    }
+
+    private void extraGravity()
+    {
+        if ((timeInAir > _gravityDelay))
+        {
+            _rigidBody.AddForce(new Vector2(0f, -_extraGravity * Time.deltaTime));
+        }
+    }
+
     private void GatherInput()
     {
         //float moveX = Input.GetAxis("Horizontal");
@@ -70,16 +117,47 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    private void Jump()
+    private void HandleJump()
     {
         if(!_frameInput.Jump)
         {
             return;
         }
 
-        if (CheckGrounded()) {
-            _rigidBody.AddForce(Vector2.up * _jumpStrength, ForceMode2D.Impulse);
+        if(doubleJumpAvailable)
+        {
+            
+            onJump?.Invoke();
         }
+        else if(_coyoteTime > 0f)
+        {
+            onJump?.Invoke();
+        }
+        else if (doubleJumpAvailable)
+        {
+            doubleJumpAvailable = false;
+            onJump?.Invoke();
+        }
+    }
+    
+    private void CoyoteTimer()
+    {
+        if(CheckGrounded())
+        {
+            _coyoteTimer = _coyoteTime;
+        }
+        else
+        {
+            _coyoteTimer -= Time.deltaTime;
+        }
+    }
+
+    private void ApplyJumpForce()
+    {
+        _rigidBody.linearVelocity = Vector2.zero;
+        timeInAir = 0f;
+        _coyoteTimer = 0f;
+        _rigidBody.AddForce(Vector2.up * _jumpStrength, ForceMode2D.Impulse);
     }
 
     private void HandleSpriteFlip()

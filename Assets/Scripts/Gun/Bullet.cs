@@ -29,10 +29,19 @@ public class Bullet : MonoBehaviour
         _rigidBody.linearVelocity = _fireDirection * _moveSpeed;
     }
 
-    private void OnTriggerEnter2D(Collider2D other) {
-        Health health = other.gameObject.GetComponent<Health>();
-        health?.TakeDamage(_damageAmount);
-        Destroy(this.gameObject);
-        _gun.ReleaseBulletFromPool(this);
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Bullet"))
+        {
+            return;
+        }
+        else if (other.gameObject.CompareTag("Enemy") || other.gameObject.CompareTag("Ground"))
+        {
+            Health health = other.gameObject.GetComponent<Health>();
+            health?.TakeDamage(_damageAmount);
+            Destroy(this.gameObject);
+            _gun.ReleaseBulletFromPool(this);
+        }
+
     }
 }
